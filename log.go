@@ -40,9 +40,11 @@ func New(opt Option) (*Hooker, error) {
 
 func (h *Hooker) Fire(entry *logrus.Entry) error {
 	data := make(logrus.Fields)
-	data["Level"] = entry.Level.String()
-	data["Time"] = entry.Time
-	data["Message"] = entry.Message
+	data["level"] = entry.Level.String()
+	data["time"] = entry.Time
+	data["msg"] = entry.Message
+	data["file"] = entry.Caller.File
+	data["function"] = entry.Caller.Function
 
 	for k, v := range entry.Data {
 		if errData, isError := v.(error); logrus.ErrorKey == k && v != nil && isError {
