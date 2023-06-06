@@ -45,6 +45,7 @@ func (h *Hooker) Fire(entry *logrus.Entry) error {
 	data["msg"] = entry.Message
 	data["file"] = entry.Caller.File
 	data["function"] = entry.Caller.Function
+	data["line"] = entry.Caller.Line
 
 	for k, v := range entry.Data {
 		if errData, isError := v.(error); logrus.ErrorKey == k && v != nil && isError {
