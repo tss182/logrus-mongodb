@@ -12,9 +12,6 @@ import (
 func New(opt Option) (*Hooker, error) {
 	//connect to mongodb
 	protocol := "mongodb"
-	if opt.Srv {
-		protocol = "mongodb+srv"
-	}
 	uri := fmt.Sprintf("%s://%s:%s@%s:%s",
 		protocol,
 		url.QueryEscape(opt.MongoUser),
@@ -22,6 +19,15 @@ func New(opt Option) (*Hooker, error) {
 		opt.MongoHost,
 		opt.MongoPort,
 	)
+	if opt.Srv {
+		protocol = "mongodb+srv"
+		uri = fmt.Sprintf("%s://%s:%s@%s",
+			protocol,
+			url.QueryEscape(opt.MongoUser),
+			url.QueryEscape(opt.MongoPass),
+			opt.MongoHost,
+		)
+	}
 
 	ctx := context.Background()
 
