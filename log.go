@@ -35,7 +35,7 @@ func New(opt Option) (*Hooker, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt}, nil
+	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt, c: ctx}, nil
 }
 
 func (h *Hooker) Fire(entry *logrus.Entry) error {
@@ -51,8 +51,7 @@ func (h *Hooker) Fire(entry *logrus.Entry) error {
 			data[k] = v
 		}
 	}
-	ctx := context.Background()
-	_, mgoErr := h.db.Collection(h.opt.MongoCollection).InsertOne(ctx, data)
+	_, mgoErr := h.db.Collection(h.opt.MongoCollection).InsertOne(h.c, data)
 
 	if mgoErr != nil {
 		return fmt.Errorf("failed to send log entry to mongodb: %v", mgoErr)
