@@ -35,6 +35,9 @@ func New(opt Option) (*Hooker, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		_ = client.Disconnect(ctx)
+	}()
 	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt, c: ctx}, nil
 }
 
