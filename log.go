@@ -10,34 +10,40 @@ import (
 )
 
 func New(opt Option) (*Hooker, error) {
-	//connect to mongodb
-	protocol := "mongodb"
-	uri := fmt.Sprintf("%s://%s:%s@%s:%s",
-		protocol,
-		url.QueryEscape(opt.MongoUser),
-		url.QueryEscape(opt.MongoPass),
-		opt.MongoHost,
-		opt.MongoPort,
-	)
-	if opt.Srv {
-		protocol = "mongodb+srv"
-		uri = fmt.Sprintf("%s://%s:%s@%s",
+	var ctx context.Context
+	var client *mongo.Client
+	if opt.MongoClient != nil {
+		client = opt.MongoClient
+		ctx = opt.Ctx
+	} else {
+		ctx = context.Background()
+		//connect to mongodb
+		protocol := "mongodb"
+		uri := fmt.Sprintf("%s://%s:%s@%s:%s",
 			protocol,
 			url.QueryEscape(opt.MongoUser),
 			url.QueryEscape(opt.MongoPass),
 			opt.MongoHost,
+			opt.MongoPort,
 		)
+		if opt.Srv {
+			protocol = "mongodb+srv"
+			uri = fmt.Sprintf("%s://%s:%s@%s",
+				protocol,
+				url.QueryEscape(opt.MongoUser),
+				url.QueryEscape(opt.MongoPass),
+				opt.MongoHost,
+			)
+		}
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			_ = client.Disconnect(ctx)
+		}()
 	}
 
-	ctx := context.Background()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = client.Disconnect(ctx)
-	}()
 	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt, c: ctx}, nil
 }
 

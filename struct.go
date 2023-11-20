@@ -12,6 +12,8 @@ type (
 		c   context.Context
 	}
 	Option struct {
+		MongoClient     *mongo.Client
+		Ctx             context.Context
 		Srv             bool
 		MongoHost       string
 		MongoUser       string
