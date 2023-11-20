@@ -11,12 +11,11 @@ import (
 
 func New(opt Option) (*Hooker, error) {
 	var ctx context.Context
+	ctx = context.Background()
 	var client *mongo.Client
 	if opt.MongoClient != nil {
 		client = opt.MongoClient
-		ctx = opt.Ctx
 	} else {
-		ctx = context.Background()
 		//connect to mongodb
 		protocol := "mongodb"
 		uri := fmt.Sprintf("%s://%s:%s@%s:%s",
@@ -35,10 +34,11 @@ func New(opt Option) (*Hooker, error) {
 				opt.MongoHost,
 			)
 		}
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+		c, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err != nil {
 			return nil, err
 		}
+		client = c
 		defer func() {
 			_ = client.Disconnect(ctx)
 		}()
