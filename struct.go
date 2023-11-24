@@ -14,6 +14,7 @@ type (
 	Option struct {
 		MongoClient     *mongo.Client
 		Srv             bool
+		Ctx             context.Context
 		MongoHost       string
 		MongoUser       string
 		MongoPass       string

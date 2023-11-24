@@ -15,6 +15,7 @@ func New(opt Option) (*Hooker, error) {
 	var client *mongo.Client
 	if opt.MongoClient != nil {
 		client = opt.MongoClient
+		ctx = opt.Ctx
 	} else {
 		//connect to mongodb
 		protocol := "mongodb"
