@@ -10,12 +10,9 @@ import (
 )
 
 func New(opt Option) (*Hooker, error) {
-	var ctx context.Context
-	ctx = context.Background()
 	var client *mongo.Client
 	if opt.MongoClient != nil {
 		client = opt.MongoClient
-		ctx = opt.Ctx
 	} else {
 		//connect to mongodb
 		protocol := "mongodb"
@@ -35,6 +32,7 @@ func New(opt Option) (*Hooker, error) {
 				opt.MongoHost,
 			)
 		}
+		ctx := context.Background()
 		c, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 		if err != nil {
 			return nil, err
@@ -45,7 +43,7 @@ func New(opt Option) (*Hooker, error) {
 		}()
 	}
 
-	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt, c: ctx}, nil
+	return &Hooker{db: client.Database(opt.MongoDBName), opt: &opt}, nil
 }
 
 func (h *Hooker) Fire(entry *logrus.Entry) error {
@@ -64,7 +62,7 @@ func (h *Hooker) Fire(entry *logrus.Entry) error {
 			data[k] = v
 		}
 	}
-	_, mgoErr := h.db.Collection(h.opt.MongoCollection).InsertOne(h.c, data)
+	_, mgoErr := h.db.Collection(h.opt.MongoCollection).InsertOne(context.Background(), data)
 
 	if mgoErr != nil {
 		return fmt.Errorf("failed to send log entry to mongodb: %v", mgoErr)
